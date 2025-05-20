@@ -1,7 +1,6 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {AgGridReact} from "ag-grid-react";
-import {ModuleRegistry} from "ag-grid-community";
-import {AllCommunityModule} from "ag-grid-community";
+import {AllCommunityModule, ModuleRegistry} from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -12,34 +11,36 @@ const App = () => {
     const ws = useRef(null);
 
     useEffect(() => {
+        // 1. Fetch initial data
+        fetch("http://localhost:8000/rows")
+            .then(res => res.json())
+            .then(data => {
+                setRowData(data);
+            })
+            .catch(err => console.error("❌ Failed to load data:", err));
+
+        // 2. Set up WebSocket
         ws.current = new WebSocket("ws://localhost:8000/ws");
 
         ws.current.onmessage = (event) => {
             const updated = JSON.parse(event.data);
+            console.log("📥 WebSocket message:", updated);
             setRowData(prev =>
                 prev.map(row => (row.id === updated.id ? updated : row))
             );
         };
 
-        ws.current.onopen = () => {
-            console.log("WebSocket connected");
-        };
+        ws.current.onopen = () => console.log("🔌 WebSocket connected");
+        ws.current.onerror = (error) => console.error("WebSocket error:", error);
+        ws.current.onclose = () => console.log("❌ WebSocket closed");
 
-        ws.current.onerror = (error) => {
-            console.error("WebSocket error:", error);
-        };
-
-        ws.current.onclose = () => {
-            console.log("WebSocket closed");
-        };
-
-        // ✅ Cleanup only when the component is unmounted
         return () => {
             if (ws.current?.readyState === WebSocket.OPEN) {
                 ws.current.close();
             }
         };
-    }, []); // <-- only run once
+    }, []);
+
 
     const onCellValueChanged = async (params) => {
         await fetch("http://localhost:8000/rows", {

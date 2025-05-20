@@ -1,9 +1,11 @@
+import json
+
+from bson import ObjectId
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from bson import ObjectId
+
 from database import collection
 from models import Row
-import json
 
 app = FastAPI()
 
@@ -17,13 +19,16 @@ app.add_middleware(
 
 clients = []
 
+
 @app.get("/rows")
 async def get_rows():
     rows = []
     async for row in collection.find():
         row["id"] = str(row["_id"])
+        del row["_id"]
         rows.append(row)
     return rows
+
 
 @app.post("/rows")
 async def update_row(row: Row):
@@ -38,6 +43,7 @@ async def update_row(row: Row):
     await broadcast_change(row)
     return row
 
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -47,6 +53,7 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.receive_text()
     except WebSocketDisconnect:
         clients.remove(websocket)
+
 
 async def broadcast_change(row: Row):
     data = json.dumps(row.dict())
