@@ -35,8 +35,8 @@ A real-time collaborative data grid built with **FastAPI**, **MongoDB**, **React
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/realtime-grid-app.git
-cd realtime-grid-app
+git clone https://github.com/jlieberherr/realtime-grid.git
+cd realtime-grid
 ```
 
 ### 2. Set Up the Backend
@@ -44,7 +44,7 @@ cd realtime-grid-app
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
