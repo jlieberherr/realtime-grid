@@ -56,8 +56,8 @@ const App = () => {
                 ref={gridRef}
                 rowData={rowData}
                 columnDefs={[
-                    {field: "name", editable: true},
-                    {field: "value", editable: true}
+                    {field: "name", editable: true, filter: true},
+                    {field: "value", editable: true, filter: "agNumberColumnFilter"}
                 ]}
                 onCellValueChanged={onCellValueChanged}
             />
